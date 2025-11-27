@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roda da Vida - Avaliação Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .option {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .option:hover {
+            transform: scale(1.05);
+            background-color: #fef3c7;
+        }
+        .option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #5568d3;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            animation: pulse 2s infinite;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #4b5563;
+        }
+        .input-icon input {
+            padding-left: 40px;
+        }
+        .tips-highlight {
+            animation: tipsPulse 2s infinite alternate;
+            box-shadow: 
+                0 0 12px rgba(102, 126, 234, 0.7),
+                0 0 24px rgba(118, 75, 162, 0.5);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+        }
+        @keyframes tipsPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+        .module-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 6px 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .module-habilidades {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .alert-warning {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .alert-danger {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            animation: pulse-alert 1.5s infinite;
+        }
+        @keyframes pulse-alert {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        .alert-success {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .area-info {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+        <h2 class="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-2">Impulso Coaching</h2>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">Roda da Vida</h1>
+        <p class="text-center text-gray-600 mb-6">Avalie seu nível de satisfação em cada área da sua vida</p>
+        
+        <div id="form-section">
+            <div class="bg-gradient-to-r from-purple-100 to-indigo-100 p-6 rounded-lg mb-6 shadow-md">
+                <p class="text-xl font-semibold text-gray-800 mb-4">Dados Pessoais</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <input type="text" id="name" placeholder="Nome" class="border border-purple-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gradient-to-r from-white to-purple-50">
+                    </div>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <input type="number" id="age" placeholder="Idade" class="border border-purple-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gradient-to-r from-white to-purple-50">
+                    </div>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <input type="text" id="occupation" placeholder="Profissão" class="border border-purple-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gradient-to-r from-white to-purple-50">
+                    </div>
+                </div>
+                <div class="input-icon mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <input type="email" id="email" placeholder="Email" class="border border-purple-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gradient-to-r from-white to-purple-50">
+                </div>
+                <div class="tips-highlight bg-gradient-to-r from-purple-100 to-indigo-100 p-6 rounded-lg mb-6 shadow-md">
+                    <p class="text-xl font-semibold text-gray-800 mb-4">Como Usar Esta Ferramenta:</p>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li>Avalie cada área de 1 a 10, onde 1 é "muito insatisfeito" e 10 é "totalmente satisfeito".</li>
+                        <li>Seja sincera(o) em suas avaliações.</li>
+                        <li>Pense em como cada área está impactando sua vida atualmente.</li>
+                        <li>Identifique as áreas que precisam de mais atenção e desenvolvimento.</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="startTest()" class="btn-primary text-white px-6 py-3 rounded-lg transition shadow-md">Iniciar Pesquisa</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="test-section" class="hidden">
+            <p class="text-center text-gray-600 mb-4 text-lg">Avalie cada área de 1 a 10</p>
+            
+            <!-- Barra de Progresso -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="progress" class="text-gray-600 font-semibold">Área 1 de 12</span>
+                    <span class="text-purple-600 font-semibold" id="progress-percent">8%</span>
+                </div>
+                <div class="w-full bg-gray-300 rounded-full h-3">
+                    <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full" style="width: 8%;"></div>
+                </div>
+            </div>
+            
+            <div id="questions">
+                <!-- Perguntas serão inseridas aqui pelo JavaScript -->
+            </div>
+            <div class="flex justify-between mt-8">
+                <button onclick="previousQuestion()" class="btn-secondary text-white px-6 py-3 rounded-lg transition shadow-md">Anterior</button>
+                <span id="progress" class="text-gray-600 font-semibold">Área 1 de 12</span>
+                <button onclick="nextQuestion()" class="btn-primary text-white px-6 py-3 rounded-lg transition shadow-md">Próxima</button>
+            </div>
+        </div>
+
+        <div id="result-section" class="hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-2">Seus Resultados</h2>
+                <p class="text-2xl font-semibold text-gray-800" id="result-name"></p>
+            </div>
+            
+            <div class="chart-container mb-8">
+                <canvas id="wheelChart"></canvas>
+            </div>
+
+            <div id="areas-info" class="space-y-4 mb-8">
+                <!-- Informações das áreas serão inseridas aqui -->
+            </div>
+
+            <div id="total-section" class="mt-10 p-6 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl shadow-inner">
+                <h3 class="text-2xl font-bold text-indigo-900 mb-3 text-center">Satisfação Geral da Vida</h3>
+                <div class="text-center">
+                    <div class="text-6xl font-bold text-purple-600" id="total-score">0</div>
+                    <p class="text-gray-800 text-center mt-2">Seu nível geral de satisfação e equilíbrio de vida</p>
+                </div>
+                <div id="total-explanation" class="mt-6"></div>
+            </div>
+
+            <div class="flex justify-center gap-4 mt-8 flex-wrap">
+                <button onclick="resetTest()" class="btn-secondary text-white px-6 py-3 rounded-lg transition shadow-md">Fazer Novamente</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const areas = [
+            { name: 'Saúde e Disposição', description: 'Seu estado de saúde física, energia e bem-estar corporal.' },
+            { name: 'Desenvolvimento Intelectual', description: 'Aprendizado, crescimento mental e desenvolvimento de habilidades.' },
+            { name: 'Espiritualidade', description: 'Conexão espiritual, propósito de vida e valores pessoais.' },
+            { name: 'Plenitude e Felicidade', description: 'Satisfação geral com a vida e sensação de plenitude.' },
+            { name: 'Criatividade', description: 'Expressão criativa, inovação e desenvolvimento de talentos.' },
+            { name: 'Relacionamentos', description: 'Qualidade dos relacionamentos amorosos e familiares.' },
+            { name: 'Vida Social', description: 'Amizades, vida social e conexões com outras pessoas.' },
+            { name: 'Situação Financeira', description: 'Estabilidade financeira e segurança econômica.' },
+            { name: 'Carreira', description: 'Satisfação profissional, crescimento e realização na carreira.' },
+            { name: 'Passional', description: 'Paixão, motivação e entusiasmo pela vida.' },
+            { name: 'Pessoal', description: 'Autoconhecimento, autoestima e desenvolvimento pessoal.' },
+            { name: 'Qualidade de Vida', description: 'Equilíbrio geral, bem-estar e qualidade de vida.' }
+        ];
+
+        const colors = [
+            '#FF6B6B', // Vermelho
+            '#FFA500', // Laranja
+            '#FFD93D', // Amarelo
+            '#6BCB77', // Verde
+            '#4D96FF', // Azul
+            '#9D84B7', // Roxo
+            '#FF69B4', // Rosa
+            '#00CED1', // Turquesa
+            '#FFB6C1', // Rosa claro
+            '#87CEEB', // Azul céu
+            '#DDA0DD', // Orquídea
+            '#F0E68C'  // Cáqui
+        ];
+
+        const responses = {};
+        let currentQuestion = 0;
+        let userData = {};
+        let chart = null;
+
+        function startTest() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const age = document.getElementById('age').value;
+            const occupation = document.getElementById('occupation').value.trim();
+
+            if (!name || !email) {
+                alert('Por favor, preencha o nome e o email.');
+                return;
+            }
+
+            userData = { name, email, age, occupation };
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('test-section').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const questionsDiv = document.getElementById('questions');
+            questionsDiv.innerHTML = '';
+
+            const area = areas[currentQuestion];
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'bg-purple-50 p-6 rounded-lg shadow-sm mb-6';
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'module-title module-habilidades mb-4';
+            titleDiv.textContent = `Área ${currentQuestion + 1}`;
+            questionDiv.appendChild(titleDiv);
+
+            const areaName = document.createElement('p');
+            areaName.className = 'text-lg text-gray-800 mb-2 font-semibold';
+            areaName.textContent = area.name;
+            questionDiv.appendChild(areaName);
+
+            const areaDesc = document.createElement('p');
+            areaDesc.className = 'text-gray-700 mb-6';
+            areaDesc.textContent = area.description;
+            questionDiv.appendChild(areaDesc);
+
+            const sliderContainer = document.createElement('div');
+            sliderContainer.className = 'mb-6';
+
+            const label = document.createElement('label');
+            label.className = 'block text-gray-700 font-semibold mb-2';
+            label.textContent = `Satisfação: ${responses[currentQuestion] || 1} / 10`;
+            label.id = 'slider-label';
+            sliderContainer.appendChild(label);
+
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = '1';
+            slider.max = '10';
+            slider.value = responses[currentQuestion] || 1;
+            slider.className = 'w-full h-3 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-600';
+            slider.oninput = function() {
+                responses[currentQuestion] = parseInt(this.value);
+                document.getElementById('slider-label').textContent = `Satisfação: ${this.value} / 10`;
+            };
+            sliderContainer.appendChild(slider);
+
+            questionDiv.appendChild(sliderContainer);
+            questionsDiv.appendChild(questionDiv);
+
+            const progressPercent = Math.round(((currentQuestion + 1) / areas.length) * 100);
+            document.getElementById('progress').textContent = `Área ${currentQuestion + 1} de ${areas.length}`;
+            document.getElementById('progress-percent').textContent = progressPercent + '%';
+            document.getElementById('progress-bar').style.width = progressPercent + '%';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < areas.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('test-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+
+            const scores = areas.map((area, index) => responses[index] || 1);
+            const totalScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+
+            document.getElementById('result-name').textContent = userData.name;
+            document.getElementById('total-score').textContent = totalScore;
+
+            renderChart(scores);
+            renderAreasInfo(scores);
+            renderTotalExplanation(totalScore, scores);
+
+            // Salvar automaticamente
+            generateAndSendPDF(scores, totalScore);
+        }
+
+        function renderChart(scores) {
+            const ctx = document.getElementById('wheelChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: areas.map(a => a.name),
+                    datasets: [{
+                        label: 'Sua Satisfação',
+                        data: scores,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.15)',
+                        borderWidth: 3,
+                        pointBackgroundColor: colors,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 3,
+                        pointRadius: 7,
+                        pointHoverRadius: 10,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                lineWidth: 2
+                            },
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                lineWidth: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: { size: 14, weight: 'bold' },
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            },
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.r + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderAreasInfo(scores) {
+            const areasInfo = document.getElementById('areas-info');
+            areasInfo.innerHTML = '';
+
+            areas.forEach((area, index) => {
+                const score = scores[index];
+                const isLow = score < 5;
+                const isMedium = score >= 5 && score < 8;
+
+                const areaDiv = document.createElement('div');
+                areaDiv.className = `area-info ${isLow ? 'bg-red-100' : isMedium ? 'bg-yellow-100' : 'bg-green-100'}`;
+                areaDiv.style.borderLeftColor = colors[index];
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'font-semibold text-gray-800 mb-2';
+                titleDiv.textContent = `${area.name}: ${score}/10`;
+                areaDiv.appendChild(titleDiv);
+
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'text-sm text-gray-700';
+                
+                if (isLow) {
+                    statusDiv.innerHTML = `<p class="font-semibold text-red-700">⚠️ Atenção Necessária</p><p>Esta área requer atenção especial. Considere trabalhar em melhorias nesta dimensão da sua vida.</p>`;
+                } else if (isMedium) {
+                    statusDiv.innerHTML = `<p class="font-semibold text-yellow-700">📊 Desenvolvimento Possível</p><p>Há espaço para crescimento. Pequenas melhorias podem trazer mais satisfação.</p>`;
+                } else {
+                    statusDiv.innerHTML = `<p class="font-semibold text-green-700">✅ Satisfação Boa</p><p>Você está satisfeito nesta área. Continue mantendo esse nível de qualidade.</p>`;
+                }
+                
+                areaDiv.appendChild(statusDiv);
+                areasInfo.appendChild(areaDiv);
+            });
+        }
+
+        function renderTotalExplanation(totalScore, scores) {
+            const totalExplanation = document.getElementById('total-explanation');
+            const hasVeryLow = scores.some(score => score < 4);
+            const lowCount = scores.filter(score => score < 5).length;
+
+            let explanation = '';
+
+            if (totalScore >= 8) {
+                explanation = `
+                    <div class="alert-success">
+                        <p class="font-semibold mb-2">🌟 Excelente Equilíbrio de Vida!</p>
+                        <p>Você está muito satisfeito com sua vida. Suas áreas estão bem equilibradas e você está vivendo de forma plena. Continue investindo nesse equilíbrio e compartilhando essa energia positiva com as pessoas ao seu redor.</p>
+                    </div>
+                `;
+            } else if (totalScore >= 6) {
+                explanation = `
+                    <div class="alert-success">
+                        <p class="font-semibold mb-2">👍 Bom Equilíbrio de Vida</p>
+                        <p>Você está satisfeito com a maioria das áreas da sua vida. Existem algumas áreas que podem ser melhoradas. Identifique as áreas com scores mais baixos e trabalhe em desenvolvê-las para alcançar maior equilíbrio.</p>
+                    </div>
+                `;
+            } else if (totalScore >= 4) {
+                explanation = `
+                    <div class="alert-warning">
+                        <p class="font-semibold mb-2">⚠️ Desenvolvimento Necessário</p>
+                        <p>Seu nível geral de satisfação está abaixo do esperado. Recomendamos que você trabalhe em melhorar o equilíbrio entre as áreas da sua vida. Procure recursos como coaching, terapia ou grupos de apoio para fortalecer essas dimensões.</p>
+                    </div>
+                `;
+            } else {
+                explanation = `
+                    <div class="alert-danger">
+                        <p class="font-semibold mb-2">🚨 ALERTA CRÍTICO</p>
+                        <p>Seu nível geral de satisfação está muito baixo. Isso pode estar afetando significativamente seu bem-estar emocional e qualidade de vida. <strong>Recomendamos fortemente que você procure um profissional qualificado (psicólogo, terapeuta ou coach) para ajudá-lo a reequilibrar sua vida.</strong></p>
+                    </div>
+                `;
+            }
+
+            if (hasVeryLow) {
+                explanation += `
+                    <div class="alert-danger mt-4">
+                        <p class="font-semibold mb-2">⛔ ATENÇÃO ESPECIAL</p>
+                        <p>Você tem ${lowCount} área(s) com satisfação muito baixa (abaixo de 4/10). Isso indica dificuldades significativas que merecem atenção profissional. Não hesite em buscar ajuda de um psicólogo ou coach especializado.</p>
+                    </div>
+                `;
+            }
+
+            totalExplanation.innerHTML = explanation;
+        }
+
+        function generateAndSendPDF(scores, totalScore) {
+            const chartImage = document.getElementById('wheelChart').toDataURL('image/png');
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
+            let y = 10;
+            const name = userData.name;
+            const age = userData.age || 'Não informado';
+            const occupation = userData.occupation || 'Não informado';
+            const email = userData.email;
+
+            // PÁGINA 1
+            doc.setFontSize(18);
+            doc.text('Impulso Coaching', pageWidth / 2, y, { align: 'center' });
+            y += 8;
+            doc.setFontSize(14);
+            doc.text('Roda da Vida - Avaliação Completa', pageWidth / 2, y, { align: 'center' });
+            y += 12;
+            doc.setFontSize(10);
+            doc.text(`Nome: ${name} | Idade: ${age} | Profissão: ${occupation} | E-mail: ${email}`, pageWidth / 2, y, { align: 'center', maxWidth: 180 });
+            y += 16;
+            doc.setFontSize(12);
+            doc.text('Por que avaliar o equilíbrio da sua vida é importante?', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+            doc.setFontSize(10);
+            const introText = "A Roda da Vida é uma ferramenta poderosa de autoconhecimento que avalia seu nível de satisfação em 12 áreas essenciais da vida. Compreender o equilíbrio entre essas dimensões é fundamental para alcançar uma vida plena, satisfatória e significativa. Cada área — desde saúde e carreira até relacionamentos e espiritualidade — contribui de forma única para seu bem-estar geral. Quando uma ou mais áreas estão desequilibradas, isso afeta toda a qualidade de vida. A autoavaliação consciente permite que você identifique onde está investindo energia e onde precisa de mais atenção. Ao trabalhar no desenvolvimento equilibrado de todas as áreas, você cria uma base sólida para felicidade, realização pessoal e sucesso em todas as dimensões da vida. Este é o primeiro passo para uma transformação significativa e duradoura.";
+            doc.text(introText, 20, y, { maxWidth: 170, lineHeightFactor: 1.6 });
+            y += 45;
+            doc.setFontSize(9);
+            doc.text('A mudança pode acontecer em um instante', pageWidth / 2, 285, { align: 'center' });
+
+            // PÁGINA 2 - Gráfico
+            doc.addPage();
+            y = 15;
+            doc.setFontSize(14);
+            doc.text('Gráfico da Roda da Vida', pageWidth / 2, y, { align: 'center' });
+            y += 15;
+            
+            const imgWidth = 180;
+            const imgHeight = 180;
+            doc.addImage(chartImage, 'PNG', (pageWidth - imgWidth) / 2, y, imgWidth, imgHeight);
+            y += imgHeight + 10;
+            
+            doc.setFontSize(9);
+            doc.text('A mudança pode acontecer em um instante', pageWidth / 2, 285, { align: 'center' });
+            
+            // PÁGINA 3 - Resultados por Área
+            doc.addPage();
+            y = 15;
+            doc.setFontSize(14);
+            doc.text('Resultados por Área', pageWidth / 2, y, { align: 'center' });
+            y += 15;
+
+            areas.forEach((area, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.setFontSize(11);
+                doc.text(`${area.name}: ${scores[index]}/10`, 20, y);
+                const barWidth = (scores[index] / 10) * 140;
+                doc.setFillColor(...hexToRgb(colors[index]));
+                doc.rect(20, y + 3, barWidth, 6, 'F');
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(20, y + 3, 140, 6);
+                y += 18;
+            });
+            doc.setFontSize(9);
+            doc.text('A mudança pode acontecer em um instante', pageWidth / 2, 285, { align: 'center' });
+
+            // PÁGINA 4
+            doc.addPage();
+            y = 20;
+            doc.setFontSize(16);
+            doc.text(`Satisfação Geral da Vida: ${totalScore}/10`, pageWidth / 2, y, { align: 'center' });
+            y += 20;
+            doc.setFontSize(12);
+            doc.text('As 12 Áreas da Roda da Vida', pageWidth / 2, y, { align: 'center' });
+            y += 12;
+            doc.setFontSize(10);
+            const items = areas.map(a => `• ${a.name}: ${a.description}`);
+            items.forEach(item => {
+                if (y > 260) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(item, 20, y, { maxWidth: 175 });
+                y += 8;
+            });
+            y += 12;
+            doc.setFontSize(11);
+            doc.text('Impulso Coaching', pageWidth - 20, y, { align: 'right' });
+            doc.setFontSize(9);
+            doc.text('impulsoflow@gmail.com', pageWidth - 20, y + 6, { align: 'right' });
+            doc.setFontSize(9);
+            doc.text('A mudança pode acontecer em um instante', pageWidth / 2, 285, { align: 'center' });
+
+            const pdfName = `resultado_roda_vida_${name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')}.pdf`;
+            doc.save(pdfName);
+
+            // Capturar tela
+            html2canvas(document.getElementById('result-section')).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL();
+                link.download = `Resultado_Roda_Vida_${name}_${new Date().toISOString().split('T')[0]}.png`;
+                link.click();
+            });
+
+            // Enviar email
+            const mailtoSubject = encodeURIComponent(`Resultado da Roda da Vida - ${name}`);
+            const mailtoBody = encodeURIComponent(
+                `Nome: ${name}
+Idade: ${age}
+Profissão: ${occupation}
+E-mail: ${email}
+
+Resultados:
+${areas.map((area, index) => `${area.name}: ${scores[index]}/10`).join('\n')}
+
+Satisfação Geral da Vida: ${totalScore}/10
+
+O PDF "${pdfName}" foi salvo. Por favor, anexe-o ao e-mail e envie.`
+            );
+            window.location.href = `mailto:impulsoflow@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+            setTimeout(() => {
+                alert(`✅ Pesquisa finalizada!\n📄 O PDF foi salvo.\n📸 A tela foi capturada.\n✉️ Um e-mail foi aberto — basta anexar os arquivos e enviar!`);
+            }, 500);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16)
+            ] : [100, 100, 100];
+        }
+
+        function resetTest() {
+            currentQuestion = 0;
+            Object.keys(responses).forEach(key => delete responses[key]);
+            userData = {};
+            document.getElementById('form-section').classList.remove('hidden');
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('name').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('occupation').value = '';
+            document.getElementById('email').value = '';
+        }
+    </script>
+</body>
+</html>
